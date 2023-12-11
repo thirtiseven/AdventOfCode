@@ -33,7 +33,7 @@ defmodule Solution do
   end
 
   def range_to_min(a, b, maplist) do
-    Enum.map(a..b, fn x -> Solution.seed_to_location(x, maplist) end)
+    Enum.map(a..b//10, fn x -> Solution.seed_to_location(x, maplist) end)
     |> Enum.min()
   end
 
