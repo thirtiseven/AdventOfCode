@@ -8,19 +8,28 @@ defmodule Solution do
     |> Enum.filter(fn x -> x != [""] end)
   end
 
-  def palindrome_at(str, pos) do
+  def diff(a, b) do
+    len = String.length(a)
+    0..(len - 1)
+    |> Enum.map(fn x -> String.at(a, x) == String.at(b, x) end)
+    |> Enum.count(fn x -> x == false end)
+  end
+
+  def almost_palindrome_at(str, pos) do
     len = str |> String.length()
     half_len = min(pos + 1, len - pos - 1)
     a = String.slice(str, (pos - half_len + 1)..(pos)) |> String.reverse()
     b = String.slice(str, (pos + 1)..(pos + half_len))
-    a == b
+    diff(a, b)
   end
 
   def palindrome_row_at(lines, pos) do
-    lines
-    |> Enum.map(fn x -> palindrome_at(x, pos) end)
+    diff = lines
+    |> Enum.map(fn x -> almost_palindrome_at(x, pos) end)
     |> IO.inspect()
-    |> Enum.all?(fn x -> x == true end)
+    |> Enum.sum()
+
+    diff == 1
   end
 
   def palindrome_col_at(lines, pos) do
@@ -28,7 +37,12 @@ defmodule Solution do
     half_len = min(pos + 1, len - pos - 1)
     a = Enum.slice(lines, (pos - half_len + 1)..(pos)) |> Enum.reverse()
     b = Enum.slice(lines, (pos + 1)..(pos + half_len))
-    a == b
+    diff = a
+    |> Enum.zip(b)
+    |> Enum.map(fn {x, y} -> diff(x, y) end)
+    |> Enum.sum()
+
+    diff == 1
   end
 
   def gao(lines) do
