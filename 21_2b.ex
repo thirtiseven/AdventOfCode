@@ -1,6 +1,8 @@
 # Solution from *A Geometric solution to advent of code 2023, day 21* :
 # https://github.com/villuna/aoc23/wiki/A-Geometric-solution-to-advent-of-code-2023,-day-21
 
+# It is probably wrong.
+
 defmodule Solution do
   def readLines do
     # read each line from data.txt
@@ -35,49 +37,63 @@ defmodule Solution do
 
   def bfs(lines, start) do
     queue = [start]
-    visited = Map.put(%{}, start, 0)
+    visited = Map.put(%{}, start, 1)
     bfs_helper(lines, queue, visited)
-    |> IO.inspect()
+    |> Map.values()
   end
 
-  def man_dis({x, y}) do
-    # manhattan distance from (x, y) to (65, 65)
-    abs(x - 65) + abs(y - 65)
-  end
-
-  def gao(lines) do
+  def gao(lines, even_corners_ans) do
     visited = bfs(lines, {65, 65})
 
-    even_corners = visited
-    |> Enum.filter(fn {{x, y}, v} -> rem(v, 2) == 0 and v > 65 and man_dis({x, y}) > 65 end)
-    |> Enum.count()
-
     odd_corners = visited
-    |> Enum.filter(fn {{x, y}, v} -> rem(v, 2) == 1 and v > 65 and man_dis({x, y}) > 65 end)
+    |> Enum.filter(fn x -> rem(x, 2) == 1 and x > 65 end)
     |> Enum.count()
 
     even_full = visited
-    |> Map.values()
     |> Enum.filter(fn x -> rem(x, 2) == 0 end)
     |> Enum.count()
 
     odd_full = visited
-    |> Map.values()
     |> Enum.filter(fn x -> rem(x, 2) == 1 end)
     |> Enum.count()
 
     n = 202300 # ((26501365 - (131 / 2)) / 131)
 
-    ((n+1)*(n+1)) * odd_full + (n*n) * even_full - (n+1) * odd_corners + n * even_corners
+    ((n+1)*(n+1)) * odd_full + (n*n) * even_full - (n+1) * odd_corners + even_corners_ans
   end
 
 end
 
 
 lines = Solution.readLines()
-visited = Solution.gao(lines)
+
+visited_left_up = Solution.bfs(lines, {0, 0})
+visited_right_up = Solution.bfs(lines, {130, 0})
+visited_left_down = Solution.bfs(lines, {0, 130})
+visited_right_down = Solution.bfs(lines, {130, 130})
+
+even_corners_left_up = visited_left_up
+|> Enum.filter(fn x -> rem(x, 2) == 0 and x <= 65 end)
+|> Enum.count()
+
+even_corners_right_up = visited_right_up
+|> Enum.filter(fn x -> rem(x, 2) == 0 and x <= 65 end)
+|> Enum.count()
+
+even_corners_left_down = visited_left_down
+|> Enum.filter(fn x -> rem(x, 2) == 0 and x <= 65 end)
+|> Enum.count()
+
+even_corners_right_down = visited_right_down
+|> Enum.filter(fn x -> rem(x, 2) == 0 and x <= 65 end)
+|> Enum.count()
+
+even_corners = even_corners_left_up + even_corners_right_up + even_corners_left_down + even_corners_right_down
+
+even_corners_ans = Integer.floor_div(even_corners, 4) * even_corners
+
+visited = Solution.gao(lines, even_corners_ans)
 IO.inspect(visited)
 
-# 596734601954383
-# 596734624471510
-# 596734624269210
+# 596734624471510 too high
+# 596733864166729 too low
